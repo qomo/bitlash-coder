@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="/static/keymaster.js"></script>
+        <script LANGUAGE="JavaScript">
+            //创建XMLHTTPRequest对象
+            function createXMLHTTPRequest(){
+                if(window.ActiveXObject){ //判断是否支持ActiveX控件
+                    return new ActiveXObject("Microsoft.XMLHTTP");//通过实例化ActiveXObject的一个新实例来创建XMLHTTPRequest对象
+                }
+                else if(window.XMLHttpRequest){//判断是否把XMLHTTPRequest实现为一个本地的javascript对象
+                    return new XMLHttpRequest();
+                }
+            }
+            function postCommand(){
+                document.getElementById("ht").value=document.getElementById("ht").value+"<<<\n"+document.getElementById("cm").value+"\n";
+                xmlHttpRequest = createXMLHTTPRequest();
+                xmlHttpRequest.onreadystatechange = cmCallback;
+                xmlHttpRequest.open("POST", '/', true);
+                var formData = new FormData(document.getElementById("cmform"));
+                xmlHttpRequest.send(formData);
+            }
+
+            function cmCallback(){
+                if(xmlHttpRequest.readyState == 4 && xmlHttpRequest.status == 200){
+                    ht_textarea = document.getElementById("ht");
+                    ht_textarea.value=ht_textarea.value+">>>\n"+xmlHttpRequest.responseText+'\n'
+                    ht_textarea.scrollTop = ht_textarea.scrollHeight;
+                    cm_textarea = document.getElementById("cm");
+                    cm_textarea.value="";
+                    cm_textarea.focus();
+                }
+            }
+            // define short of 'ctrl+enter'
+            key('w', function(){
+                postCommand();
+            });
+        </script>
+        <title>Bitlash commander</title>
+    </head>
+    <body>
+        <h1 id="headline">Bitlash commander</h1>
+        <p>
+        History<br>
+        <textarea name="history" id="ht" rows="15" cols="100" readonly="readonly">
+        </textarea>
+        </p>
+        <p>
+        <form action="/" id="cmform" method="post">
+            Command<br>
+            <textarea name="command" id="cm" rows="10" cols="100" autofocus>
+            </textarea>
+            </p>
+            <!-- <input type="submit" value="Submit"> -->
+        </form>
+    </body>
+</html>
