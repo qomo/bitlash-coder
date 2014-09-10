@@ -15,20 +15,21 @@ class Bitlash:
 
     def bit_decoder(self, command):
         decoded_command = " ".join(command.split())
+        # print "bit_decoder:", decoded_command, "\n"
         return decoded_command
 
     def to_bitlash(self, decoded_command):
         while(not self.ser.isOpen()):
             pass
+        # print "to_bitlash\n"
         self.ser.writelines(decoded_command+"\n")
 
     def from_bitlash(self):
         outstr = ""
-        self.ser.readline()
-        # print 1
+        # print "from_bitlash\n"
         while 1:
             firstchar = self.ser.read()
-            # print "while"
+            # print "firstchar:", firstchar, "\n"
             if firstchar == ">":
                 break
             outstr = outstr + firstchar + self.ser.readline() + "\n"
@@ -40,15 +41,17 @@ class Bitlash:
 
 class IndexHandler(tornado.web.RequestHandler):
     def get(self):
+        # should add some output first time
         self.render('index.html')
     def post(self):
         bitlash = Bitlash("/dev/ttyUSB0")
+        output = bitlash.from_bitlash()
+        # print output
         command = self.get_argument("command", None)
         decommand = bitlash.bit_decoder(command)
         bitlash.to_bitlash(decommand)
         output = bitlash.from_bitlash()
         bitlash.__del__()
-        # self.write(" ".join(command.split()))
         self.write(output)
 
 
