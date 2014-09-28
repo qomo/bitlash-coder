@@ -15,8 +15,10 @@ class Bitlash(threading.Thread):
     def __init__(self, serport):
         threading.Thread.__init__(self)
         self.ser = serial.Serial(serport, 57600)
-        self.ser.flushInput()
-        self.ser.flushOutput()
+        self.ser.close()
+        self.ser.open()
+        # self.ser.flushInput()
+        # self.ser.flushOutput()
         self.thread_stop = False
 
     def bit_decoder(self, command):
@@ -25,10 +27,11 @@ class Bitlash(threading.Thread):
         return decoded_command
 
     def to_bitlash(self, decoded_command):
-        while(not self.ser.isOpen()):
-            pass
-        # print "to_bitlash\n", decoded_command
+        # while(not self.ser.isOpen()):
+            # pass
+        # self.ser.writelines("\n")
         self.ser.writelines(decoded_command+"\n")
+        print "to_bitlash\n", decoded_command
 
     # def from_bitlash(self):
     #     outstr = ""
@@ -43,18 +46,15 @@ class Bitlash(threading.Thread):
 
     def run(self):
         '''Read serial port and write to a file'''
+        global SEROUT_BUF
         while not self.thread_stop:
-            time.sleep(0.1)
             line = self.ser.readline()
+            time.sleep(0.1)
             if line:
-                self.file = open("SEROUT", 'a')
-                self.file.write(line)
-                self.file.close()
-            # print line
+                SEROUT_BUF.append(line)
 
     def stop(self):
         self.thread_stop = True
-        # self.__del__()
 
     def __del__(self):
         self.ser.close()
@@ -63,37 +63,26 @@ class Bitlash(threading.Thread):
 class IndexHandler(tornado.web.RequestHandler):
     def get(self):
         # should add some output first time
-        file = open("SEROUT", 'w')
-        file.close()
         self.render('index.html')
     def post(self):
         global BITLASH
-        # print "hello"
-        # output = BITLASH.from_bitlash()
-        # print output
         command = self.get_argument("command", None)
-        # print "CMD:", command
         decommand = BITLASH.bit_decoder(command)
-        # if "quit" in decommand:
-            # BITLASH.stop()
-            # exit(0)
-        # print "DC:", decommand
         BITLASH.to_bitlash(decommand)
-        # output = BITLASH.from_bitlash()
-        # print "OUT:", output
-        # self.write(output)
 
 class RenewHistory(tornado.web.RequestHandler):
     """Renew the history textbox."""
     def get(self):
-        # print "test RenewHistory"
-        file = open("SEROUT", 'r')
-        outstrlist = file.readlines()
+        global SEROUT_BUF
         outstr = ""
-        outstr = outstr.join(outstrlist)
-        # print outstr
-        file.close()
+        if SEROUT_BUF:
+            outstr = outstr.join(SEROUT_BUF)
+            SEROUT_BUF = []
+        print outstr
         self.write(outstr)
+
+
+SEROUT_BUF = []
 
 
 try:

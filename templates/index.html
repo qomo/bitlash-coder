@@ -38,7 +38,7 @@
             function htCallback(){
                 if(xmlHttpRequest.readyState == 4 && xmlHttpRequest.status == 200){
                     ht_textarea = document.getElementById("ht");
-                    ht_textarea.value = xmlHttpRequest.responseText;
+                    ht_textarea.value = ht_textarea.value+xmlHttpRequest.responseText;
                     ht_textarea.scrollTop = ht_textarea.scrollHeight;
                 }
             }
@@ -48,7 +48,7 @@
                 postCommand();
             });
 
-            setInterval("postRenewHistory()", "100");
+            setInterval("postRenewHistory()", "200");
 
         </script>
         <title>Bitlash coder</title>
