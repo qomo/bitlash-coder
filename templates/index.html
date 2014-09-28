@@ -13,7 +13,6 @@
                 }
             }
             function postCommand(){
-                document.getElementById("ht").value=document.getElementById("ht").value+"<<<\n"+document.getElementById("cm").value+"\n";
                 xmlHttpRequest = createXMLHTTPRequest();
                 xmlHttpRequest.onreadystatechange = cmCallback;
                 xmlHttpRequest.open("POST", '/', true);
@@ -23,18 +22,34 @@
 
             function cmCallback(){
                 if(xmlHttpRequest.readyState == 4 && xmlHttpRequest.status == 200){
-                    ht_textarea = document.getElementById("ht");
-                    ht_textarea.value=ht_textarea.value+">>>\n"+xmlHttpRequest.responseText+'\n'
-                    ht_textarea.scrollTop = ht_textarea.scrollHeight;
                     cm_textarea = document.getElementById("cm");
                     cm_textarea.value="";
                     cm_textarea.focus();
                 }
             }
+
+            function postRenewHistory(){
+                xmlHttpRequest = createXMLHTTPRequest();
+                xmlHttpRequest.onreadystatechange = htCallback;
+                xmlHttpRequest.open("GET", '/renew', true);
+                xmlHttpRequest.send(null);
+            }
+
+            function htCallback(){
+                if(xmlHttpRequest.readyState == 4 && xmlHttpRequest.status == 200){
+                    ht_textarea = document.getElementById("ht");
+                    ht_textarea.value = xmlHttpRequest.responseText;
+                    ht_textarea.scrollTop = ht_textarea.scrollHeight;
+                }
+            }
+
             // define short of 'ctrl+enter'
             key('w', function(){
                 postCommand();
             });
+
+            setInterval("postRenewHistory()", "100");
+
         </script>
         <title>Bitlash coder</title>
     </head>
@@ -53,5 +68,6 @@
             </p>
             <!-- <input type="submit" value="Submit"> -->
         </form>
+        <!-- <button type="button" onclick="postRenewHistory()">Test Button</button> -->
     </body>
 </html>
