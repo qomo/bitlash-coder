@@ -86,7 +86,7 @@ SEROUT_BUF = []
 
 
 try:
-    BITLASH = Bitlash("/dev/ttyUSB0")
+    BITLASH = Bitlash("/dev/ttyACM0")
     BITLASH.start()
 except Exception, e:
     print 'open serial failed.'

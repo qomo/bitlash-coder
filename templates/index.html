@@ -18,6 +18,8 @@
                 xmlHttpRequest.open("POST", '/', true);
                 var formData = new FormData(document.getElementById("cmform"));
                 xmlHttpRequest.send(formData);
+                cm_textarea = document.getElementById("cm");
+                cm_textarea.value="";
             }
 
             function cmCallback(){
